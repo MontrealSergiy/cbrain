@@ -311,10 +311,11 @@
       <% t.cell("Execution")      { index_count_filter Bourreau.where(:user_id => @user.id).count,    :bourreaux,      {:user_id => @user.id, :type => "Bourreau"} } %>
     <% end %>
 
-    <% t.cell("Disk Usage Limits (Quotas)" do %>
-      render partial: "disk_quotas/disk_quotas_table"
-    <% end %>
 
+    <% t.cell("", no_header: true, show_width: 2) do
+      render partial: "disk_quotas/disk_quotas_table"
+     end
+    %>
 
   <% end %>
 

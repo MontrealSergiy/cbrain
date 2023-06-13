@@ -100,7 +100,6 @@ class UsersController < ApplicationController
       :user_id          => [ 0, @user.id ],
     ).includes([:user, :data_provider])
 
-    @base_scope   = base_scope
     @view_scope   = @scope.apply(@base_scope)
 
     @scope.pagination ||= Scope::Pagination.from_hash({ :per_page => 15 })
