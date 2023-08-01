@@ -84,7 +84,6 @@ class DataProvidersController < ApplicationController
                                 )
 
     @typelist = get_type_list
-    @groups   = current_user.assignable_groups | current_user.listable_groups #
     render template: 'data_providers/normal_new' unless current_user.has_role?(:admin_user) # normal user only allowed create UserkeyFlatDirSshDataProvider
   end
 
@@ -860,7 +859,6 @@ class DataProvidersController < ApplicationController
   # This action checks that the remote side of a Ssh DataProvider is
   # accessible using SSH.
   def check
-
     id = params[:id]
     @provider = DataProvider.find(id)
     unless @provider.has_owner_access?(current_user)
@@ -932,15 +930,9 @@ class DataProvidersController < ApplicationController
     # Ok, all is well.
     flash[:notice] = "The configuration was tested and seems to be operational."
     respond_to do |format|
-      format.html do
-        redirect_to :action => :show
-      end
-      format.xml  do
-        render :xml  => 'ok'
-      end
-      format.json do
-        render :json => 'ok'
-      end
+      format.html { redirect_to :action => :show }
+      format.xml  { render      :xml    => 'ok' }
+      format.json { render      :xml    => 'ok' }
     end
 
 
