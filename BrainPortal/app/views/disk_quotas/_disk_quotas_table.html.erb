@@ -80,7 +80,7 @@
     # This column is a bit misleading: it shows the CURRENT OR BROWSE_AS USER's resources for all
     # quota records that are DP-wide, and the AFFECTED USER'S resources for the user-specific quotas.
     # To see a specific user quotas goto the user profile
-    t.column("My Usage") do |dq|
+    t.column("Usage") do |dq|
       what = dq.exceeded?(dq.user_id == 0 ? @as_user.id : dq.user_id)
       what = nil if dq.cursize.zero? && dq.curfiles.zero? # happens for dq with -1,-1
       if what.nil?
