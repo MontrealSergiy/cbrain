@@ -56,8 +56,8 @@
         <div class="grid">
           <% categories.each do |category| %>
             <div class="card">
-              <div class="btn-text primary card_heading">
-                 </p><%=  category.title %>
+              <div class="btn-text primary card_heading" style="background-color:<%= category.color %>>">
+                 <%=  category.title %>
               </div>
 
                 <% category.urls.each_with_index do |url, i| %>
