@@ -2,7 +2,7 @@
 #
 # CBRAIN Project
 #
-# Copyright (C) 2008-2012
+# Copyright (C) 2008-2024
 # The Royal Institution for the Advancement of Learning
 # McGill University
 #
@@ -201,6 +201,34 @@ class PortalSystemChecks < CbrainChecker #:nodoc:
         :name           => 'CBRAIN AgentLocker',
       }
     )
+  end
+
+
+  # touch to avoid deletion by cluster bimonthly sctratch cleanup :
+  # 1) DataProvider cache dir
+  # 2) DP_Cache_Key.md5
+  # 3) DP_Cache_Rev.id
+  # 4) cache_dir which is typically updated often, but we touch it just in the case
+  def self.z020_dp_cache_and_symlink_will_exists #:nodoc:
+
+    myself        = RemoteResource.current_resource
+    cache_dir     = myself.dp_cache_dir
+    dp_cache_id   = File.join cache_dir,     DataProvider::DP_CACHE_ID_FILE
+    dp_cache_md5  = File.join cache_dir,     DataProvider::DP_CACHE_MD5_FILE
+
+    puts "C> Updating timestamp for cache folder as well as its symlink, MD5 and ID files"
+
+    begin
+      FileUtils.touch [cache_dir, dp_cache_id, dp_cache_md5], verbose: true, nocreate: true
+        # files still might be deleted if a bourreau is not rebooted for a long time
+        # some cluster can have policies countering touch abuse
+        # touch command may fail for many reasons, e.g. resource issues
+        # sometimes touch might fails even if timestamp update is successful
+      puts "C> Timestamps are updated."
+    rescue => e
+      puts "C> Timestamps update FAILED: " + e.message
+      return
+    end
   end
 
 end

@@ -2,7 +2,7 @@
 #
 # CBRAIN Project
 #
-# Copyright (C) 2008-2012
+# Copyright (C) 2008-2024
 # The Royal Institution for the Advancement of Learning
 # McGill University
 #
@@ -21,6 +21,7 @@
 #
 
 require 'socket'
+require 'fileutils'
 
 class BourreauSystemChecks < CbrainChecker #:nodoc:
 
@@ -480,6 +481,44 @@ class BourreauSystemChecks < CbrainChecker #:nodoc:
 
     puts "C> \t- '#{sym_path}' -> '#{cache_dir}'"
 
+  end
+
+
+
+  # touch to avoid deletion by cluster bimonthly sctratch cleanup : 1) DataProvider cache dir, 2) DP_Cache_Key.md5 3) DP_Cache_Rev.id
+  # 4) gridshare dir, and 5) DP_Cache symbolic link located in it
+  # gridshare and cache_dir are typically updated often, but we touch them just in the case
+  def self.a105_ensure_dp_cache_and_symlink_will_exists #:nodoc:
+
+    myself        = RemoteResource.current_resource
+    cache_dir     = myself.dp_cache_dir
+    dp_cache_id   = File.join cache_dir,     DataProvider::DP_CACHE_ID_FILE
+    dp_cache_md5  = File.join cache_dir,     DataProvider::DP_CACHE_MD5_FILE
+    gridshare_dir = myself.cms_shared_dir
+    sym_path      = File.join gridshare_dir, DataProvider::DP_CACHE_SYML
+
+    puts "C> Updating timestamp for cache folder as well as its symlink, MD5 and ID files"
+
+    begin
+      FileUtils.touch [gridshare_dir, cache_dir, dp_cache_id, dp_cache_md5], verbose: true, nocreate: true
+    # files still might be deleted if a bourreau is not rebooted for a long time
+    # some cluster can have policies countering touch abuse
+    # touch command may fail for many reasons, e.g. resource issues
+    # sometimes touch might fails even if timestamp update is successful
+    rescue => e
+      puts "C> Cache MD5 and ID files timestamp update FAILED: " + e.message
+      return
+    end
+
+    # update timestamp for a softlink (rather than the folder it points to)
+
+    if system "touch -h #{sym_path}"
+      puts "C> Timestamps are updated."
+    else
+      puts "C> Cache symlink timestamp update FAILED!!!"
+      puts "C> Try to recreate the symlink manually!"  # older version of touch or unix do no support symlink updates
+    end
+    return if Time.now - File.lstat(sym_path).mtime > 1.day  #  fail only if symlink is seriously outdated
   end
 
 
