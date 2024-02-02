@@ -2,7 +2,7 @@
 #
 # CBRAIN Project
 #
-# Copyright (C) 2008-2012
+# Copyright (C) 2008-2023
 # The Royal Institution for the Advancement of Learning
 # McGill University
 #
@@ -20,28 +20,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-#Helper methods for Group views.
-module GroupsHelper
+# This class provides an exception class for
+# representing a user key connection error.
+# At the moment it does not guaranty though that connection is good.
+class DataProviderTestConnectionError < CbrainError
 
   Revision_info=CbrainFileRevision[__FILE__] #:nodoc:
 
-  # Returns the appropriate CSS type for +group+
-  # +group_user_count+ corresponds to how many users belong to the group. It
-  # is queried from the group if not supplied.
-  def css_group_type(group, group_user_count = nil)
-    # Special cases ("ALL")
-    return group.to_s.downcase unless group.is_a?(Group)
-
-    # SystemGroup subclasses; UserGroup => "user", EveryoneGroup => "everyone"
-    return "user"     if group.is_a?(UserGroup)
-    return "everyone" if group.is_a?(EveryoneGroup)
-    return "site"     if group.is_a?(SiteGroup)
-
-    group_user_count ||= group.users.count
-
-    return "public"    if group.public?
-    return "shared"    if group_user_count > 1
-    return "private"
-  end
-
 end
+

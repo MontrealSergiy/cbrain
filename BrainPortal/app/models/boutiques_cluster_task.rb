@@ -137,7 +137,6 @@ class BoutiquesClusterTask < ClusterTask
     end
 
     # Write down the file with the boutiques descriptor itself
-    boutiques_json_basename = ".boutiques.#{self.run_id}.json"
     File.open(boutiques_json_basename, "w") do |fh|
       cleaned_desc = descriptor.dup
       cleaned_desc.delete("groups") if cleaned_desc.groups.size == 0 # bosh is picky
@@ -152,7 +151,11 @@ class BoutiquesClusterTask < ClusterTask
           #{boutiques_json_basename.bash_escape}
       SIMULATE
       simulate_com.gsub!("\n"," ")
-      simulout = IO.popen(simulate_com) { |fh| fh.read }
+      begin
+         simulout = IO.popen(simulate_com) { |fh| fh.read }
+      rescue => ex
+         cb_error "The 'bosh exec simulate' command failed: #{ex.class} #{ex.message}"
+      end
       simul_status = $? # a Process::Status object
       if ! simul_status.success?
         cb_error "The 'bosh exec simulate' command failed with return code #{simul_status.exitstatus}"
@@ -253,8 +256,9 @@ class BoutiquesClusterTask < ClusterTask
         userfile_class = SingleFile     if File.file?(path)      && !(userfile_class <= SingleFile)
         userfile_class = FileCollection if File.directory?(path) && !(userfile_class <= FileCollection)
 
-        # Save the file (possible overwrite if race condition)
+        # Save the file
         outfile = safe_userfile_find_or_new(userfile_class, :name => name)
+        new_out = outfile.new_record?
 
         unless outfile.save
           messages = outfile.errors.full_messages.join("; ")
@@ -265,10 +269,15 @@ class BoutiquesClusterTask < ClusterTask
         end
 
         # Transfer content to DataProvider
+        self.addlog("Created result file '#{name}' (ID #{outfile.id})") if   new_out
+        self.addlog("Reused result file '#{name}' (ID #{outfile.id})")  if ! new_out
+        self.addlog("Uploading content to #{outfile.data_provider.type} '#{outfile.data_provider.name}' (ID #{outfile.data_provider_id})")
         outfile.cache_copy_from_local_file(path)
+        self.addlog("Content uploaded")
+
+        # Record ID of output file in task's params
         params["_cbrain_output_#{output.id}"] ||= []
         params["_cbrain_output_#{output.id}"]  |= [ outfile.id ]
-        self.addlog("Saved result file #{name}")
 
         # Add provenance logs
         all_file_input_ids = descriptor.file_inputs.map do |input|
@@ -331,7 +340,8 @@ class BoutiquesClusterTask < ClusterTask
     desc   = descriptor_for_save_results
     custom = desc.custom || {} # 'custom' is not packaged as an object, just a hash
     idlist = custom['cbrain:no-run-id-for-outputs'].presence # list of IDs where no run id inserted
-    no_run_id = true if idlist && idlist.include?(output.id)
+    # We allow no_run_id only if the dest DP is MultiLevel, presumably the output goes to "a/b/c/basename_without_id"
+    no_run_id = true if idlist && idlist.include?(output.id) && self.results_data_provider.has_browse_path_capabilities?
 
     # Get basename, use it to guess the class
     name = File.basename(pathname)
@@ -402,6 +412,12 @@ class BoutiquesClusterTask < ClusterTask
   # that holds the 'invoke' structure for bosh.
   def invoke_json_basename
     ".invoke.#{self.run_id}.json"
+  end
+
+  # Returns the basename of the JSON file
+  # that holds the boutiques descriptor for bosh.
+  def boutiques_json_basename
+    ".boutiques.#{self.run_id}.json"
   end
 
   # Return true or false depending on if
