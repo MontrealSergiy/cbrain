@@ -275,6 +275,35 @@ module BoutiquesSupport
       CbrainFileRevision.for_relpath(path)
     end
 
+    #-------------------------------------------------------------------------
+    # Methods to access and document CBRAIN specific custom properties
+    #-------------------------------------------------------------------------
+
+    # Return strings with name(s) and emails(s) of the Boutiques descriptor authors. Emails are optional
+    # and should be in angle brackets
+    #
+    # For example
+    #    "custom": { "cbrain:author": "Full Name  <email@address.ca>, Co-author Name  <anotheremail@address.org>" }
+    #
+    def author_custom
+      authors = self.custom['cbain:author']
+      return authors if authors is_a? String
+      return authors.join(", ")   # if author field is arrays
+    end
+
+    # Return strings with name(s) and emails(s) of the Boutiques descriptor authors. Emails are optional
+    # and should be in angle brackets
+    #
+    # For example
+    #    "custom": { "cbrain:author": "Full Name  <email@address.ca>, Co-author Name  <anotheremail@address.org>" }
+    #
+    def author_custom
+      authors = self.custom['cbain:author']
+      return authors if authors is_a? String
+      return authors.join(", ")   # if author field is arrays
+    end
+
+
     # Given a module name, returns the structure with the
     # data for it stored under the "custom"['cbrain:integrator_modules']
     # entry of the descriptor.
