@@ -286,7 +286,7 @@ module BoutiquesSupport
     #    "custom": { "cbrain:author": "Full Name  <email@address.ca>, Co-author Name  <anotheremail@address.org>" }
     #
     def author_custom
-      authors = self.custom['cbain:author']
+      authors = self.custom['cbrain:author']
       return authors if authors is_a? String
       return authors.join(", ")   # if author field is arrays
     end
