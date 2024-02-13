@@ -371,30 +371,120 @@ module BoutiquesSupport
     #   as walltime added to Boutiques resources sections
     #
 
-    # Return strings with name(s) and emails(s) of the Boutiques descriptor authors. Emails are optional
+    # Returns a string with name(s) and emails(s) of the Boutiques descriptor authors, enlisted in
+    # "cbrain:author" custom property of the descriptors. Emails are optional
     # and should be in angle brackets
     #
-    # For example
+    # For example, given the descriptor with
     #    "custom": { "cbrain:author": "Full Name  <email@address.ca>, Co-author Name  <anotheremail@address.org>" }
-    #
+    # The method returns string
+    #    "Full Name  <email@address.ca>, Co-author Name  <anotheremail@address.org>"
     def author_custom
       authors = self.custom['cbrain:author']
       return authors if authors is_a? String
-      return authors.join(", ")   # if author field is arrays
+      return authors.join(", ")   #  if author field is arrays
     end
 
-    # Return strings with name(s) and emails(s) of the Boutiques descriptor authors. Emails are optional
-    # and should be in angle brackets
-    #
-    # For example
-    #    "custom": { "cbrain:author": "Full Name  <email@address.ca>, Co-author Name  <anotheremail@address.org>" }
-    #
-    def author_custom
-      authors = self.custom['cbain:author']
-      return authors if authors is_a? String
-      return authors.join(", ")   # if author field is arrays
+    # Returns Boutiques CBRAIN custom property indicating
+    # are forking sub-task(s) allowed. To submit a subtask, a task must create a JSON file
+    # named ".new-task-*.json"  at the root of its
+    # work directory
+    # An example of property definition in a tool descriptor:
+    #   "custom: {
+    #     "cbrain:can-submit-new-tasks": true
+    #   }
+    def can_submit_new_tasks_custom
+      return self.custom["cbrain:can-submit-new-tasks"]
     end
 
+    # Returns Boutiques CBRAIN custom property indicating
+    # the outputs which will not be saved.
+    # An example of property definition in a tool descriptor:
+    #   "custom: {
+    #     "cbrain:ignore_outputs": [output_id_1, output_id_2, output_id_3 ... ]
+    #   }
+    def ignore_outputs_custom
+      return self.custom["cbrain:ignore_outputs"]
+    end
+
+    # Returns Boutiques CBRAIN custom property indicating
+    # inputs which are saved back to the dataprovider (the original data will be mutated)
+    # An example of property definition in a tool descriptor:
+    #   "custom: {
+    #     "cbrain:save_back_inputs": [id_1, id_2, id_3 ...]
+    #   }
+    def save_back_inputs_custom
+      return self.custom["cbrain:save_back_inputs"]
+    end
+
+    # Returns Boutiques CBRAIN custom property indicating
+    # if the tool cannot modify inputs
+    # An example of property definition in a tool descriptor:
+    #   "custom: {
+    #     "cbrain:readonly-input-files": true
+    #   }
+    def readonly_input_files_custom
+      return self.custom["cbrain:readonly-input-files"]
+    end
+
+    # Returns Boutiques CBRAIN custom property indicating
+    # if this task may alter its input files
+    # An example of property definition in a tool descriptor:
+    #   "custom: {
+    #     "cbrain:alters-input-files": true
+    #   }
+    def alters_input_files_custom
+      return self.custom["cbrain:alters-input-files"]
+    end
+
+    # Returns Boutiques CBRAIN custom property indicating for which outputs
+    # the usual practice of adding a run id to output file names is cancelled,
+    # list of output IDs where no run id inserted. Only allowed for MultiLevel
+    # data-providers with "browse path" capability.
+    # For listed outputs ids new results overwrite old files.
+    # An example of property definition in a tool descriptor:
+    #   "custom: {
+    #     "cbrain:no-run-id-for-outputs": "id_1, id_2, id_3 .."
+    #   }
+    def no_run_id_for_outputs_custom
+      return self.custom["cbrain:no-run-id-for-outputs"]
+    end
+
+    # Returns Boutiques CBRAIN custom property indicating
+    # for which inputs an empty string is a valid input
+    # An example of property definition in a tool descriptor:
+    #   "custom: {
+    #     "cbrain:allow_empty_strings": [input_id]
+    #   }
+    def allow_empty_strings_custom
+      return self.custom["cbrain:allow_empty_strings"]
+    end
+
+    # Experimental
+    # The default implied value is 'simulate'
+    # In the mode 'simulate', at the moment of creating
+    # the tool's script in cluster_commands(), the
+    # output of 'bosh exec simulate' will be substituted in
+    # the script to generate the tool's command.
+    # In the mode 'launch', an actual 'bosh exec launch' command
+    # will be put in the script instead.
+    # An example of property definition in a tool descriptor:
+    #   "custom: {
+    #     "cbrain:boutiques_bosh_exec_mode": "launch"
+    #   }
+    def boutiques_bosh_exec_mode_custom
+      return self.custom["cbrain:boutiques_bosh_exec_mode"]
+    end
+
+    # An advanced feature for seasoned CBRAIN experts only. That allows
+    # overwrite the standard task behavior with custom class
+    # An example of property definition in a tool descriptor:
+    #   "custom: {
+    #     "cbrain:inherits-from-class": "MyClassName"
+    #   }
+    def inherits_from_class_custom
+      return self.custom["cbrain:inherits-from-class"]
+    end
 
     # Given a module name, returns the structure with the
     # data for it stored under the "custom"['cbrain:integrator_modules']
