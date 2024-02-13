@@ -197,6 +197,98 @@ module BoutiquesSupport
     # Methods to access and document CBRAIN specific custom properties
     #-------------------------------------------------------------------------
 
+    # The standard Boutiques properties sets does not cover all the need for CBRAIN
+    # thus we introduce a number of custom properties, which can be added to the
+    # "custom" section of a Boutiques descriptor, to fine-tune the way CBRAIN
+    # interpret the descriptor. For example,
+    #
+    #   "custom": {
+    #     "cbrain:readonly-input-files": true,
+    #     "cbrain:author": "Erik Lee <leex6144@umn.edu>",
+    #     "cbrain:allow_empty_strings": ["derivatives_prefix"],
+    #     "cbrain:no-run-id-for-outputs": [ "OutputDirectory"],
+    #     "cbrain:integrator_modules": {
+    #         "BoutiquesFileTypeVerifier": {
+    #             "SubjectDirectory": [ "BidsSubject" ]
+    #         },
+    #         "BoutiquesFileNameMatcher": {
+    #             "SubjectDirectory": "^sub-[a-zA-Z0-9_]+$"
+    #         },
+    #         "BoutiquesOutputFileTypeSetter": {
+    #             "OutputDirectory": "MADEOutput"
+    #         },
+    #         "BoutiquesForcedOutputBrowsePath" : {
+    #           "OutputDirectory": "[DERIVATIVES_PREFIX]made"
+    #         },
+    #         "BoutiquesBidsSingleSubjectMaker": "SubjectDirectory",
+    #         "BoutiquesBidsSubjectFileSelector": {
+    #            "SubjectDirectory": "all_to_keep"
+    #         }
+    #     }
+    # }
+    #
+    #  ---------------- Present List of Properties -----------------------------
+    #
+    # "cbrain:author": "Full Name <email@address>"
+    # 	Author(s) of boutiques descriptor
+    #
+    # "cbrain:can-submit-new-tasks": true
+    # 	Allows forking sub-task(s). To submit a subtask, a task must create a ".new-task-*.json" JSON file at the root of its
+    #   work directory
+    #
+    # "cbrain:ignore_outputs": [output_id_1, output_id_2, output_id_3 ... ]
+    # 	The listed outputs will not be saved.
+    #
+    # "cbrain:save_back_inputs": [id_1, id_2, id_3 ...]
+    # 	Saves back listed inputs to the dataprovider (mutates the original inputs)
+    #
+    # "cbrain:readonly-input-files": true
+    # 	Indicates that tool cannot modify inputs
+    #
+    # "cbrain:alters-input-files": true
+    # 	Indicates that this task may alter its input files
+    #
+    # "cbrain:no-run-id-for-outputs": "id_1, id_2, id_3 .."
+    #   Prevents usual practice of adding a run id to output file names,
+    #   list of output IDs where no run id inserted. Only allowed for MultiLevel
+    #   data-providers with "browse path" capability.
+    #   With this option new results can overwrite old files.
+    #
+    # "cbrain:allow_empty_strings": [input_id]
+    #   allow an empty string as a valid input
+    #
+    # "cbrain:boutiques_bosh_exec_mode": "launch"
+    #   Experimental
+    #   The default implied value is 'simulate'
+    # 	In the mode 'simulate', at the moment of creating
+    #   the tool's script in cluster_commands(), the
+    #   output of 'bosh exec simulate' will be substituted in
+    #   the script to generate the tool's command.
+    #   In the mode 'launch', an actual 'bosh exec launch' command
+    #   will be put in the script instead.
+    #
+    # "cbrain:inherits-from-class": "MyClassName"
+    #   An advanced feature for seasoned CBRAIN experts only. That allows
+    #   overwrite the standard task behavior with custom class
+    #
+    # "cbrain:integrator_modules": {
+    #   "BoutiquesModuleOne": {module-specific-parameters},
+    #   "BoutiquesModuleTwo": {module-specific-parameters}    #
+    # }
+    #   Works only for the most recent Boutiques integration method.
+    #   All the modules are defined in the lib folder of cbrain codebase or a plugin.
+    #   Thus documentation for all the module-based sub-properties can be auto-generated with rdoc utility.
+    #
+    # "cbrain:ignore-exit-status": true
+    # 	Deprecated.
+    #   Considers task successful even if presence wrong exit status.
+    #   For the case tool has wrong exit codes (deprecated being superseded by a module based property)
+    #
+    # "cbrain:walltime-estimate": value_in_seconds
+    #   Deprecated
+    #   as walltime added to Boutiques resources sections
+    #
+
     # Return strings with name(s) and emails(s) of the Boutiques descriptor authors. Emails are optional
     # and should be in angle brackets
     #
