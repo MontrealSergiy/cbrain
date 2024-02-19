@@ -370,6 +370,7 @@ module BoutiquesSupport
     #   Deprecated
     #   as walltime added to Boutiques resources sections
     #
+    # The methods to retrieve the values related to cbrain custom properties are listed below
 
     # Returns a string with name(s) and emails(s) of the Boutiques descriptor authors, enlisted in
     # "cbrain:author" custom property of the descriptors. Emails are optional
@@ -489,6 +490,8 @@ module BoutiquesSupport
     # Given a module name, returns the structure with the
     # data for it stored under the "custom"['cbrain:integrator_modules']
     # entry of the descriptor.
+    # All modules can be found in the lib subdirectory of a cbrain plugin
+    # or cbrain itself and start with Boutiques prefix.
     def custom_module_info(modulename)
       self.custom['cbrain:integrator_modules'][modulename]
     end
