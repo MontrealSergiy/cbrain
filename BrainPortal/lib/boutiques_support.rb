@@ -128,7 +128,7 @@ module BoutiquesSupport
     )
   end
 
-  # The following assignement is pretty much like
+  # The following assignment is pretty much like
   #   class BoutiquesDescriptor < RestrictedHash
   # except we have a closure and we can access the variables
   # initialize above (top_prop_names etc).
@@ -284,30 +284,36 @@ module BoutiquesSupport
     # "custom" section of a Boutiques descriptor, to fine-tune the way CBRAIN
     # interpret the descriptor. For example,
     #
-    #   "custom": {
+    #    "custom": {
     #     "cbrain:readonly-input-files": true,
     #     "cbrain:author": "Erik Lee <leex6144@umn.edu>",
-    #     "cbrain:allow_empty_strings": ["derivatives_prefix"],
-    #     "cbrain:no-run-id-for-outputs": [ "OutputDirectory"],
+    #     "cbrain:allow_empty_strings": [
+    #       "derivatives_prefix"
+    #     ],
+    #     "cbrain:no-run-id-for-outputs": [
+    #       "OutputDirectory"
+    #     ],
     #     "cbrain:integrator_modules": {
-    #         "BoutiquesFileTypeVerifier": {
-    #             "SubjectDirectory": [ "BidsSubject" ]
-    #         },
-    #         "BoutiquesFileNameMatcher": {
-    #             "SubjectDirectory": "^sub-[a-zA-Z0-9_]+$"
-    #         },
-    #         "BoutiquesOutputFileTypeSetter": {
-    #             "OutputDirectory": "MADEOutput"
-    #         },
-    #         "BoutiquesForcedOutputBrowsePath" : {
-    #           "OutputDirectory": "[DERIVATIVES_PREFIX]made"
-    #         },
-    #         "BoutiquesBidsSingleSubjectMaker": "SubjectDirectory",
-    #         "BoutiquesBidsSubjectFileSelector": {
-    #            "SubjectDirectory": "all_to_keep"
-    #         }
+    #       "BoutiquesFileTypeVerifier": {
+    #         "SubjectDirectory": [
+    #           "BidsSubject"
+    #         ]
+    #       },
+    #       "BoutiquesFileNameMatcher": {
+    #         "SubjectDirectory": "^sub-[a-zA-Z0-9_]+$"
+    #       },
+    #       "BoutiquesOutputFileTypeSetter": {
+    #         "OutputDirectory": "MADEOutput"
+    #       },
+    #       "BoutiquesForcedOutputBrowsePath": {
+    #         "OutputDirectory": "[DERIVATIVES_PREFIX]made"
+    #       },
+    #       "BoutiquesBidsSingleSubjectMaker": "SubjectDirectory",
+    #       "BoutiquesBidsSubjectFileSelector": {
+    #         "SubjectDirectory": "all_to_keep"
+    #       }
     #     }
-    # }
+    #   }
     #
     #  ---------------- Present List of Properties -----------------------------
     #
@@ -368,7 +374,7 @@ module BoutiquesSupport
     #
     # "cbrain:walltime-estimate": value_in_seconds
     #   Deprecated
-    #   as walltime added to Boutiques resources sections
+    #   since walltime was added to Boutiques resources sections
     #
     # The methods to retrieve the values related to cbrain custom properties are listed below
 
@@ -380,7 +386,7 @@ module BoutiquesSupport
     #    "custom": { "cbrain:author": "Full Name  <email@address.ca>, Co-author Name  <anotheremail@address.org>" }
     # The method returns string
     #    "Full Name  <email@address.ca>, Co-author Name  <anotheremail@address.org>"
-    def author_custom
+    def custom_author
       authors = self.custom['cbrain:author']
       return authors if authors is_a? String
       return authors.join(", ")   #  if author field is arrays
@@ -394,7 +400,7 @@ module BoutiquesSupport
     #   "custom: {
     #     "cbrain:can-submit-new-tasks": true
     #   }
-    def can_submit_new_tasks_custom
+    def custom_can_submit_new_tasks
       return self.custom["cbrain:can-submit-new-tasks"]
     end
 
@@ -404,7 +410,7 @@ module BoutiquesSupport
     #   "custom: {
     #     "cbrain:ignore_outputs": [output_id_1, output_id_2, output_id_3 ... ]
     #   }
-    def ignore_outputs_custom
+    def custom_ignore_outputs
       return self.custom["cbrain:ignore_outputs"]
     end
 
@@ -414,7 +420,7 @@ module BoutiquesSupport
     #   "custom: {
     #     "cbrain:save_back_inputs": [id_1, id_2, id_3 ...]
     #   }
-    def save_back_inputs_custom
+    def custom_save_back_inputs
       return self.custom["cbrain:save_back_inputs"]
     end
 
@@ -424,7 +430,7 @@ module BoutiquesSupport
     #   "custom: {
     #     "cbrain:readonly-input-files": true
     #   }
-    def readonly_input_files_custom
+    def custom_readonly_input_files
       return self.custom["cbrain:readonly-input-files"]
     end
 
@@ -434,7 +440,7 @@ module BoutiquesSupport
     #   "custom: {
     #     "cbrain:alters-input-files": true
     #   }
-    def alters_input_files_custom
+    def custom_alters_input_files
       return self.custom["cbrain:alters-input-files"]
     end
 
@@ -447,7 +453,7 @@ module BoutiquesSupport
     #   "custom: {
     #     "cbrain:no-run-id-for-outputs": "id_1, id_2, id_3 .."
     #   }
-    def no_run_id_for_outputs_custom
+    def custom_no_run_id_for_outputs
       return self.custom["cbrain:no-run-id-for-outputs"]
     end
 
@@ -457,7 +463,7 @@ module BoutiquesSupport
     #   "custom: {
     #     "cbrain:allow_empty_strings": [input_id]
     #   }
-    def allow_empty_strings_custom
+    def custom_allow_empty_strings
       return self.custom["cbrain:allow_empty_strings"]
     end
 
@@ -473,7 +479,7 @@ module BoutiquesSupport
     #   "custom: {
     #     "cbrain:boutiques_bosh_exec_mode": "launch"
     #   }
-    def boutiques_bosh_exec_mode_custom
+    def custom_boutiques_bosh_exec_mode
       return self.custom["cbrain:boutiques_bosh_exec_mode"]
     end
 
@@ -483,7 +489,7 @@ module BoutiquesSupport
     #   "custom: {
     #     "cbrain:inherits-from-class": "MyClassName"
     #   }
-    def inherits_from_class_custom
+    def custom_inherits_from_class
       return self.custom["cbrain:inherits-from-class"]
     end
 
