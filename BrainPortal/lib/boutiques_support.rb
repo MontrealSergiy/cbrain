@@ -467,8 +467,7 @@ module BoutiquesSupport
     #-------------------------------------------------------------------------
     # Methods to access and document CBRAIN specific custom properties
     #-------------------------------------------------------------------------
-
-    # The methods to retrieve the values related to CBRAIN custom properties are listed below
+    # see public/doc/boutiques_extensions for a list of these custom properties
 
     # Returns a string with name(s) and emails(s) of the Boutiques descriptor authors, enlisted in
     # "cbrain:author" custom property of the descriptors. Emails are optional
