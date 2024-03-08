@@ -30,7 +30,8 @@
 # only recognize a select set of keys and raise an exception when other keys
 # are used.
 #
-# ==Methods of BoutiquesSupport::BoutiquesDescriptor (which inherits from RestrictedHash)
+# ==Methods of +BoutiquesSupport::BoutiquesDescriptor+
+# which inherits from RestrictedHash
 #
 # ===Creation methods:
 #
@@ -47,12 +48,15 @@
 #   desc.name = 'SuperTool'  # set the name
 #   toolname  = desc.name    # gets the name
 #   ver       = desc.tool_version  # gets 'tool-version'
-#   inputs    = desc.inputs  # array of BoutiquesSupport::Input objects
+#   inputs    = desc.inputs  # array of +BoutiquesSupport::Input+ objects
 #   custom    = desc.custom  # 'custom' object within descriptor
 #
-# The same conventions apply to Boutiques::Input, Boutiques::OutputFile
-# and Boutiques::Group. See the schema of a Boutiques descriptor for the
-# list of allowed attributes in each object.
+# The same conventions apply to
+# +BoutiquesSupport::Input+,
+# +BoutiquesSupport::OutputFile+
+# and +BoutiquesSupport::Group+.
+# See the schema of a Boutiques descriptor for the list of allowed attributes
+# in each object.
 #
 # Other utility methods are documented in the source code but might not
 # appear in RDOC-generated documentation. Among these, many are
@@ -61,7 +65,7 @@
 # A number of BoutiquesDescriptor methods provide access to 'custom',
 # {CBRAIN-specific properties}[../../public/doc/cbrain_boutiques_extensions/cbrain_properties.txt]
 # of a descriptor. Such methods start with +custom+ prefix. It is strongly recommended to use these
-# methods rather than via hash.
+# methods rather than via +custom+ methods attributes.
 # We details these and few other utility methods below
 module BoutiquesSupport
 
@@ -69,7 +73,7 @@ module BoutiquesSupport
 
   # Descriptor schema
   # = class BoutiquesDescriptor
-  # is a closure in this context, and thus can accesses both schema and data extracted using it
+  # is a closure in this module, and thus can access both schema and data extracted using it
   SCHEMA_FILE = "#{Rails.root.to_s}/lib/cbrain_task_generators/schemas/boutiques.schema.json"
 
   # Attention! below we define anonymous class BoutiquesDescriptor
@@ -108,7 +112,6 @@ module BoutiquesSupport
   # :section: Getter methods of BoutiquesDescriptor for CBRAIN specific properties of the descriptor custom section
 
   # :method: custom_module_info
-  # Returns the entry for a custom Boutiques integration module
   # Given a module name, returns the structure with the
   # data for it stored under the "custom"['cbrain:integrator_modules']
   # entry of the descriptor.
@@ -178,8 +181,8 @@ module BoutiquesSupport
   # :section: Getter methods of BoutiquesDescriptor for CBRAIN specific properties of the descriptor custom section
 
   # :method: custom_inherits_from_class
-  # An advanced feature for seasoned CBRAIN experts only. That allows
-  # overwrite the standard task behavior with custom class
+  # An advanced feature for seasoned CBRAIN experts only, that allows
+  # overwrite the standard task behavior with custom class.
   # An example of property definition in a tool descriptor:
   #   "custom: {
   #     "cbrain:inherits-from-class": "MyClassName"
@@ -190,10 +193,11 @@ module BoutiquesSupport
   # :section: Getter methods of BoutiquesDescriptor for CBRAIN specific properties of the descriptor custom section
 
   # :method: custom_can_submit_new_tasks
+  # (Experimental)
   # A method of BoutiquesDescriptor.Returns Boutiques CBRAIN custom property indicating
   # are forking sub-task(s) allowed. To submit a subtask, a task must create a JSON file
   # named ".new-task-*.json"  at the root of its
-  # work directory
+  # work directory.
   # An example of property definition in a tool descriptor:
   #   "custom: {
   #     "cbrain:can-submit-new-tasks": true
@@ -228,7 +232,7 @@ module BoutiquesSupport
 
   # :method: custom_save_back_inputs
   # Returns Boutiques CBRAIN custom property indicating
-  # inputs which are saved back to the dataprovider (the original data will be mutated)
+  # inputs which are saved back to the dataprovider (the original data will be mutated).
   # An example of property definition in a tool descriptor:
   #   "custom: {
   #     "cbrain:save_back_inputs": [id_1, id_2, id_3 ...]
@@ -239,7 +243,7 @@ module BoutiquesSupport
 
   # :method: custom_readonly_input_files
   # Returns Boutiques CBRAIN custom property indicating
-  # if the tool cannot modify inputs
+  # that the tool does not modify inputs.
   # An example of property definition in a tool descriptor:
   #   "custom: {
   #     "cbrain:readonly-input-files": true
@@ -250,7 +254,7 @@ module BoutiquesSupport
 
   # :method: custom_alters_input_files
   # Returns Boutiques CBRAIN custom property indicating
-  # if this task may alter its input files
+  # if this task may alter its input files.
   # An example of property definition in a tool descriptor:
   #   "custom: {
   #     "cbrain:alters-input-files": true
@@ -267,7 +271,7 @@ module BoutiquesSupport
   # For listed outputs ids new results overwrite old files.
   # An example of property definition in a tool descriptor:
   #   "custom: {
-  #     "cbrain:no-run-id-for-outputs": []id_1, id_2, id_3 ..]
+  #     "cbrain:no-run-id-for-outputs": []id_1, id_2, id_3 ...]
   #   }
 
 
@@ -275,7 +279,7 @@ module BoutiquesSupport
 
   # :method: custom_allow_empty_strings
   # Returns Boutiques CBRAIN custom property indicating
-  # for which inputs an empty string is a valid input
+  # for which inputs an empty string is a valid input.
   # An example of property definition in a tool descriptor:
   #   "custom: {
   #     "cbrain:allow_empty_strings": [input_id]
@@ -297,6 +301,26 @@ module BoutiquesSupport
   #   "custom: {
   #     "cbrain:boutiques_bosh_exec_mode": "launch"
   #   }
+
+
+  # :section: Utility methods of +class Input+
+
+  # :method: cb_invoke_name
+  # This method return the parameter name for the input.
+  # We put all input Boutiques parameters under a 'invoke' substructure.
+  # E.g. for a input with ID 'abcd' in a task, we'll find the value
+  # in task.params['invoke']['abcd'] and the parameter name is thus
+  # "invoke[abcd]"
+
+  # :section: Utility methods of +class Input+
+
+  # :method: cb_invoke_html_name
+
+
+  # :section: Utility methods of +class Input+
+
+  # :method: cb_invoke_html_id
+
 
   # Read schema, extract some name lists
   @schema = JSON.parse(File.read(SCHEMA_FILE))
@@ -486,7 +510,7 @@ module BoutiquesSupport
     # Returns Boutiques CBRAIN custom property indicating
     # are forking sub-task(s) allowed. To submit a subtask, a task must create a JSON file
     # named ".new-task-*.json"  at the root of its
-    # work directory
+    # work directory.
     # An example of property definition in a tool descriptor:
     #   "custom: {
     #     "cbrain:can-submit-new-tasks": true
@@ -506,7 +530,8 @@ module BoutiquesSupport
     end
 
     # Returns Boutiques CBRAIN custom property indicating
-    # inputs which are saved back to the dataprovider (the original data will be mutated)
+    # inputs which are saved back to the dataprovider
+    # (the original data will be mutated).
     # An example of property definition in a tool descriptor:
     #   "custom: {
     #     "cbrain:save_back_inputs": [id_1, id_2, id_3 ...]
@@ -516,7 +541,7 @@ module BoutiquesSupport
     end
 
     # Returns Boutiques CBRAIN custom property indicating
-    # if the tool cannot modify inputs
+    # that the tool does not modify inputs.
     # An example of property definition in a tool descriptor:
     #   "custom: {
     #     "cbrain:readonly-input-files": true
@@ -526,7 +551,7 @@ module BoutiquesSupport
     end
 
     # Returns Boutiques CBRAIN custom property indicating
-    # if this task may alter its input files
+    # if this task may alter its input files.
     # An example of property definition in a tool descriptor:
     #   "custom: {
     #     "cbrain:alters-input-files": true
@@ -549,7 +574,7 @@ module BoutiquesSupport
     end
 
     # Returns Boutiques CBRAIN custom property indicating
-    # for which inputs an empty string is a valid input
+    # for which inputs an empty string is a valid input.
     # An example of property definition in a tool descriptor:
     #   "custom: {
     #     "cbrain:allow_empty_strings": [input_id]
@@ -575,7 +600,7 @@ module BoutiquesSupport
     end
 
     # An advanced feature for seasoned CBRAIN experts only. That allows
-    # overwrite the standard task behavior with custom class
+    # overwrite the standard task behavior with custom class.
     # An example of property definition in a tool descriptor:
     #   "custom: {
     #     "cbrain:inherits-from-class": "MyClassName"
