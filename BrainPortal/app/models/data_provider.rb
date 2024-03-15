@@ -1353,7 +1353,44 @@ class DataProvider < ApplicationRecord
     end
   end
 
+  # Updates the time stamp for important auxiliary directories and files
+  # as workaround for HPC file deletion policies.
+  #
+  # Some Bourreaux systems are configured with disk allocations where files older than N days are erased automatically.
+  #
+  # To prevent such system from deleting the top-level directories for the DP_Cache, and some cbrain-specific admin files, I suggest that part of the boot process should touch them to reset their timestamps.
+  #
+  # On a portal or bourreau:
+  #
+  # - the +DataProvider+ cache dir
+  # - the +DP_Cache_Key.md5+ and
+  # - +DP_Cache_Rev.id+ located in that cache dir
+  #
+  # On a bourreau:
+  #
+  # - the +gridshare+ dir
+  # - the +DP_Cache+ symbolic link located in it.
+  def self.system_touch
 
+    myself       = RemoteResource.current_resource
+    cache_dir    = myself.dp_cache_dir
+    dp_cache_id  = File.join cache_dir, DataProvider::DP_CACHE_ID_FILE
+    dp_cache_md5 = File.join cache_dir, DataProvider::DP_CACHE_MD5_FILE
+
+    FileUtils.touch [cache_dir, dp_cache_id, dp_cache_md5], verbose: true, nocreate: true
+
+    # touch only cache for Portal, for Bourreau touch gridshare
+    return true unless myself.is_a? Bourreau
+
+    gridshare_dir = myself.cms_shared_dir
+    sym_path      = File.join gridshare_dir, DataProvider::DP_CACHE_SYML
+
+    FileUtils.touch gridshare_dir, verbose: true, nocreate: true
+
+    # update timestamp for a softlink rather than the folder it points to
+    return system("touch", "--no-deference", "--no-create", sym_path)
+
+  end
 
   #################################################################
   # Access restriction checking methods, using flags in meta-data.
@@ -1615,4 +1652,3 @@ class DataProvider < ApplicationRecord
   end
 
 end
-
