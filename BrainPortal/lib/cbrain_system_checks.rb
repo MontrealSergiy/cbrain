@@ -339,7 +339,7 @@ class CbrainSystemChecks < CbrainChecker #:nodoc:
   def self.a060_ensure_cache_special_files_will_not_be_deleted #:nodoc:
 
     #-----------------------------------------------------------------------------
-    puts "C> Updating timestamp for important system files and directories"
+    puts "C> Updating timestamp for important system cache files and directories"
     #-----------------------------------------------------------------------------
 
     cache_root = DataProvider.cache_rootdir rescue nil
