@@ -204,3 +204,4 @@ class PortalSystemChecks < CbrainChecker #:nodoc:
   end
 
 end
+
