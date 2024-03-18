@@ -2,7 +2,7 @@
 #
 # CBRAIN Project
 #
-# Copyright (C) 2008-2024
+# Copyright (C) 2008-2012
 # The Royal Institution for the Advancement of Learning
 # McGill University
 #
@@ -202,4 +202,5 @@ class PortalSystemChecks < CbrainChecker #:nodoc:
       }
     )
   end
+
 end
