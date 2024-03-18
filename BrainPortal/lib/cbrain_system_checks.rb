@@ -348,8 +348,7 @@ class CbrainSystemChecks < CbrainChecker #:nodoc:
       puts "C> \t- SKIPPING! No cache root directory yet configured!"
       return
     end
-
-    DataProvider.system_touch
+    DataProvider.touch_cache
   end
 
 

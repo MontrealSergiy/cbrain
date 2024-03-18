@@ -1370,7 +1370,7 @@ class DataProvider < ApplicationRecord
   #
   # - the +gridshare+ dir
   # - the +DP_Cache+ symbolic link located in it.
-  def self.system_touch
+  def self.touch_cache
     myself       = RemoteResource.current_resource
     cache_dir    = myself.dp_cache_dir
     dp_cache_id  = File.join cache_dir, DataProvider::DP_CACHE_ID_FILE
@@ -1379,8 +1379,9 @@ class DataProvider < ApplicationRecord
     FileUtils.touch [cache_dir, dp_cache_id, dp_cache_md5], verbose: true, nocreate: true
 
     # touch only cache for Portal, for Bourreau touch gridshare
-    return true unless myself.is_a? Bourreau
-
+    return true
+  end
+  def touch_gridshare
     gridshare_dir = myself.cms_shared_dir
     sym_path      = File.join gridshare_dir, DataProvider::DP_CACHE_SYML
 
