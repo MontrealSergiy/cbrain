@@ -334,8 +334,9 @@ class CbrainSystemChecks < CbrainChecker #:nodoc:
     end
   end
 
-  # prvents archiving/delete of cbrain system files adn directories, such as cache
-  def self.a060_ensure_system_files_will_not_be_deleted #:nodoc:
+  # prevents archiving/delete of important cache files and directories, such as cache
+  # by server policies
+  def self.a060_ensure_cache_special_files_will_not_be_deleted #:nodoc:
 
     #-----------------------------------------------------------------------------
     puts "C> Updating timestamp for important system files and directories"

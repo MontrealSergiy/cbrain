@@ -484,6 +484,23 @@ class BourreauSystemChecks < CbrainChecker #:nodoc:
   end
 
 
+  # prevents archiving/delete of important cache files and directories, such as cache
+  # by server policies
+  def self.a105_ensure_gridshare_will_not_be_deleted #:nodoc:
+
+    #-----------------------------------------------------------------------------
+    puts "C> Updating timestamp for important system files and directories"
+    #-----------------------------------------------------------------------------
+
+    cache_root = DataProvider.cache_rootdir rescue nil
+    # Need to perform a `to_s` due to a strange behaviour of `blank?`
+    # on `Pathname` (if a content of a `Pathname` is empty it will return true)
+    if cache_root.to_s.blank?
+      puts "C> \t- SKIPPING! No cache root directory yet configured!"
+      return
+    end
+    DataProvider.touch_gridshare
+  end
 
   def self.a110_ensure_task_class_git_commits_cached
 

@@ -1353,7 +1353,7 @@ class DataProvider < ApplicationRecord
     end
   end
 
-  # Updates the time stamp for important auxiliary directories and files
+  # Updates the time stamp for cache directories and important auxiliary files
   # as workaround for HPC file deletion policies.
   #
   # Some Bourreaux systems are configured with disk allocations where files older than N days are erased automatically.
@@ -1366,7 +1366,7 @@ class DataProvider < ApplicationRecord
   # - the +DP_Cache_Key.md5+ and
   # - +DP_Cache_Rev.id+ located in that cache dir
   #
-  # For a bourreau:
+  # For a bourreau use +touch_gridshare+ to update
   #
   # - the +gridshare+ dir
   # - the +DP_Cache+ symbolic link located in it.
@@ -1381,14 +1381,25 @@ class DataProvider < ApplicationRecord
     # touch only cache for Portal, for Bourreau touch gridshare
     return true
   end
+
+  # Updates the time stamp for gridshare directory and link
+  # as workaround for HPC file deletion policies.
+  #
+  # Some Bourreaux systems are configured with disk allocations where files older than N days are erased automatically.
+  # To prevent such system from deleting the top-level directories
+  # the boot process should touch them to reset their timestamps.
+  #
+  # - the +gridshare+ dir
+  # - the +DP_Cache+ symbolic link located in it.
   def touch_gridshare
     gridshare_dir = myself.cms_shared_dir
     sym_path      = File.join gridshare_dir, DataProvider::DP_CACHE_SYML
 
     FileUtils.touch gridshare_dir, verbose: true, nocreate: true
 
-    # update timestamp for a softlink rather than the folder it points to
-    system("touch", "--no-deference", "--no-create", sym_path)
+    # attempt to update timestamp for a softlink rather than the folder it points to
+    # (some OSs do not support it, but should work with recent distros)
+    system("touch", "--no-dereference", sym_path)
   end
 
   #################################################################
