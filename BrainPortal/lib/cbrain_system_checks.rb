@@ -334,7 +334,8 @@ class CbrainSystemChecks < CbrainChecker #:nodoc:
     end
   end
 
-  # prvents archiving/delete of cbrain system files adn directories, such as cache
+  # prevents archiving/delete of cbrain system files and top directories, related to
+  # cache and gridshare
   def self.a060_ensure_system_files_will_not_be_deleted #:nodoc:
 
     #-----------------------------------------------------------------------------
