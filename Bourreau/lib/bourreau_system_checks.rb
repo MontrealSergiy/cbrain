@@ -21,7 +21,6 @@
 #
 
 require 'socket'
-require 'fileutils'
 
 class BourreauSystemChecks < CbrainChecker #:nodoc:
 
