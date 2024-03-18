@@ -1387,6 +1387,7 @@ class DataProvider < ApplicationRecord
     FileUtils.touch gridshare_dir, verbose: true, nocreate: true
 
     # update timestamp for a softlink rather than the folder it points to
+    # note, --no-dereference works on major os but not all of them
     system("touch", "--no-dereference", sym_path)  # --no-create is implied, at least for Rocky and Ubuntu
   end
 
