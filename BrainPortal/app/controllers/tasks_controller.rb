@@ -245,7 +245,7 @@ class TasksController < ApplicationController
     begin
       # file lists are the special case, relatively low importance, and they are seldom modified anyways
       @files  = Userfile.find_accessible_by_user(cbrain_file_list_ids, current_user, :access_requested => :read) rescue []
-      @files |= Userfile.find_accessible_by_user(file_ids - cbrain_file_list_ids, current_user, :access_requested => access) rescue []
+      @files += Userfile.find_accessible_by_user(file_ids - cbrain_file_list_ids, current_user, :access_requested => access)
     rescue RecordNotFound
 
       flash[:error] = "You should have #{access} access to the selected files."
