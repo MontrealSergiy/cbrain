@@ -20,7 +20,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-# This class extand the attributes_list array used by the
+# This class extends the attributes_list array used by the
 # CbrainFileList by adding an extra key that correspond
 # to the last column of the CSV file.
 #

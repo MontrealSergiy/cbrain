@@ -234,14 +234,22 @@ class TasksController < ApplicationController
 
     # Filter list of files as provided by the get request
     file_ids = params[:file_ids] || []
+
+    cbrain_file_list_ids = CbrainFileList.where(id: file_ids).pluck(:id)
+
     if @tool_config.try(:inputs_readonly) || @task.class.properties[:readonly_input_files]
       access = :read
     else
       access = :write
     end
-    @files   = Userfile.find_accessible_by_user(file_ids, current_user, :access_requested => access) rescue []
-    if @files.count == 0
-      flash[:error] = "You must select at least one file to which you have write access."
+    begin
+      # file lists are the special case, relatively low importance, and they are seldom modified anyways
+      @files  = Userfile.find_accessible_by_user(cbrain_file_list_ids, current_user, :access_requested => :read) rescue []
+      @files |= Userfile.find_accessible_by_user(file_ids - cbrain_file_list_ids, current_user, :access_requested => access) rescue []
+    rescue RecordNotFound
+
+      flash[:error] = "You should have #{access} access to the selected files."
+      flash[:error] = "You must select at the least one file" if @files.length == 0
       redirect_to :controller  => :userfiles, :action  => :index
       return
     end

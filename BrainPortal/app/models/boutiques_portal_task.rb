@@ -403,7 +403,7 @@ class BoutiquesPortalTask < PortalTask
         next if isInactive(input)
         userfile_id = invoke_params[input.id]
         next if userfile_id.blank?
-        userfile = Userfile.find_accessible_by_user(userfile_id, self.user, :access_requested => file_access_symbol())
+        userfile = Userfile.find_accessible_by_user(userfile_id, self.user, :access_requested => :read)
         next unless ( userfile.is_a?(CbrainFileList) || (userfile.suggested_file_type || Object) <= CbrainFileList )
         [ input, userfile ]
     end.compact
@@ -444,7 +444,11 @@ class BoutiquesPortalTask < PortalTask
       f.sync_to_cache # We need the content of the cbcsv
       f.userfiles_accessible_by_user!(self.user, nil, nil, file_access_symbol()) # side effect: cache entries within f
       for i in f.ordered_raw_ids.select{ |r| (! r.nil?) && (r.to_s != '0') }
-        accessible = Userfile.find_accessible_by_user( i, self.user, :access_requested => file_access_symbol() ) rescue nil
+        accessible = if (f.is_a? CbrainFileList) || (f.suggested_file_type&.is_a? CbrainFileList) then
+                       CbrainFileList.find_accessible_by_user( i, self.user, :access_requested => :read ) rescue nil
+                     else
+                       Userfile.find_accessible_by_user( i, self.user, :access_requested => file_access_symbol() ) rescue nil
+                     end
         params_errors.add( id, msg1.(i) ) unless accessible
         errFlag = false unless accessible
       end
