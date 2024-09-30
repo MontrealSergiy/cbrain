@@ -38,6 +38,7 @@ gem "bcrypt_pbkdf"
 # They are usually the most tricky to compile and integrate into the app.
 gem "rbnacl"
 gem "rbnacl-libsodium"
+gem "psych", '~> 3.3'
 
 # Other utilities
 gem "sys-proctable", '~> 1.2.0'
