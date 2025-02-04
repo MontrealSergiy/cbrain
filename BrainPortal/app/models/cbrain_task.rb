@@ -582,8 +582,7 @@ class CbrainTask < ApplicationRecord
   # differences. The task object itself is not changed.
   # tool_params_only indicate to argument is technical
   #
-  # +flatten_invoke+ is technical param, to unify handling
-  # of different types of tasks not be used
+  # +flatten_invoke+ is technical param, presently has no use, keep default value
   def log_params_changes(old_params = {}, new_params = {}, flatten_invoke=true)
     numchanges = 0
     if self.is_a?(BoutiquesPortalTask) && flatten_invoke
@@ -592,6 +591,9 @@ class CbrainTask < ApplicationRecord
       old_params = old_params.except('invoke')
       new_params = new_params.except('invoke')
     end
+    # presently most params seems to be either old/new_params hash keys or inside the invoke
+    # but we can potentially get one day some mixed cases, e.g. when migrating tool from old
+    # to new boutiques
     old_params.each do |ck,cv|
       if new_params.has_key?(ck)
         nv = new_params[ck]
@@ -614,7 +616,7 @@ class CbrainTask < ApplicationRecord
       numchanges += 1
     end
 
-    return numchanges if flatten_invoke  # no count reporting until non-tool params compared
+    return numchanges if ! flatten_invoke  # no count reporting until non-tool params compared
 
     if numchanges > 0
       self.addlog("Total of #{numchanges} changes observed.")
