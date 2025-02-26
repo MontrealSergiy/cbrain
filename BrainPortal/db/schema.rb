@@ -447,7 +447,7 @@ ActiveRecord::Schema.define(version: 20250225222958) do
     t.index ["userfile_id"], name: "index_tags_userfiles_on_userfile_id", using: :btree
   end
 
-  create_table "tool_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+  create_table "tool_configs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci" do |t|
     t.string   "version_name"
     t.text     "description",                   limit: 65535
     t.integer  "tool_id"
