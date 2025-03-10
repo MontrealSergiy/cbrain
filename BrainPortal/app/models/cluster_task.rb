@@ -2389,8 +2389,8 @@ docker_image_name=#{full_image_name.bash_escape}
         local_paths = Dir.glob(path) # assume no glob expression in overlay files
         cb_error "Can't find any local file matching overlay '#{path}'" if local_paths.blank?
         knd = "data provider" if knd == 'dp'  # full name for kinds
-        local_paths.each do |lpath|
-          self.addlog("Overlay configured: #{knd.rep} #{lpath}")
+        local_paths.each do |local_path|
+          self.addlog("Overlay configured: #{knd.rep} #{local_path}")
         end
       end
     end.flatten
