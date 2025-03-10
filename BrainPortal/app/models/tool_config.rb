@@ -378,22 +378,22 @@ class ToolConfig < ApplicationRecord
         cb_error "Can't find DataProvider #{id_or_name} for fetching overlays" if ! dp
         dp_ovs = dp.singularity_overlays_full_paths rescue nil
         cb_error "DataProvider #{id_or_name} does not have any overlays configured." if dp_ovs.blank?
-        ["Data Provider", id_or_name, dp_ovs]
+        ["Data Provider"].cycle.zip(dp_ovs)
       when 'file'
         cb_error "Provide absolute path for overlay file '#{id_or_name}'." if (Pathname.new id_or_name).relative?
-        ["local file", id_or_name, [id_or_name]]  # for local file, it is full file name (no ids)
+        ["local file", id_or_name]  # for local file, it is full file name (no ids)
       when 'userfile'
         # db registered file, note admin can access all files
         userfile = SingleFile.where(:id => id_or_name).last
         cb_error "Userfile with id '#{id_or_name}' for overlay fetching not found." if ! userfile
         userfile.sync_to_cache() rescue cb_error "Userfile with id '#{id_or_name}' for fetching overlay failed to synchronize."
-        ["registered file with id", id_or_name, [userfile.cache_full_path()]]
+        ["registered userfile", userfile.cache_full_path()]
       when 'ext3capture'
         nil  # handled separately
       else
         cb_error "Invalid '#{knd}:#{id_or_name}' overlay."
       end
-    end.uniq.compact
+    end.flatten(1).uniq.compact
   end
 
   # Returns an array of the data providers that are
@@ -483,14 +483,8 @@ class ToolConfig < ApplicationRecord
     # Iterate over each spec and validate them
     specs.each do |kind, id_or_name|
 
-      # compatibility layer for old file spec format, to be eventually deleted after migration
-      if id_or_name.nil?
-        id_or_name = kind
-        kind = 'old style file'
-      end
-
       case kind # different validations rules for file, userfile and dp specs
-      when 'file', 'old style file' # full path specification for a local file, e.g. "file:/myfiles/c.sqs"
+      when 'file' # full path specification for a local file, e.g. "file:/myfiles/c.sqs"
         if id_or_name !~ /^\/\S+\.(sqs|sqfs|squashfs)$/
           self.errors.add(:singularity_overlays_specs,
             " contains invalid #{kind} named '#{id_or_name}'. It should be a full path that ends in .squashfs, .sqs or .sqfs")
