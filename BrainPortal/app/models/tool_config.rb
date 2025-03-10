@@ -372,9 +372,6 @@ class ToolConfig < ApplicationRecord
     specs = parsed_overlay_specs
     specs.map do |knd, id_or_name|
 
-      # Old style file spec (legacy, to be removed)
-      next ["Local File", knd, [knd]] if knd =~ /^\//  # FIXME delete it after successful migration
-
       case knd
       when 'dp'
         dp = DataProvider.where_id_or_name(id_or_name).first
