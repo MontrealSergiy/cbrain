@@ -2367,7 +2367,7 @@ docker_image_name=#{full_image_name.bash_escape}
       mountpoint = "#{effect_workdir}/#{basename}" # e.g. /path/to/workdir/work or /T123/work
       install_ext3fs_filesystem(fs_name,size)
       safe_mkdir(basename)
-      self.addlog("Overlay configured: ext3 File System #{fs_name}")
+      self.addlog("Overlay configured: ext3 capture #{fs_name}")
       "#{sing_opts} -B #{fs_name.bash_escape}:#{mountpoint.bash_escape}:image-src=/"
     end
     # This list will be used to make a device number check: all components
@@ -2980,4 +2980,3 @@ bash -c "exit $_cbrain_status_"
   end
 
 end
-
