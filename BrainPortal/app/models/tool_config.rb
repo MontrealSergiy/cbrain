@@ -356,8 +356,8 @@ class ToolConfig < ApplicationRecord
     self.tool.cbrain_task_class
   end
 
-  # Returns an array of full paths to the Singularity overlay files that
-  # need to be mounted, along with explanation of their origin.
+  # Returns a hash of full paths to the Singularity overlay files that
+  # need to be mounted along with explanation of their origin.
   # Some of paths might
   # be patterns and will need to be resolved at run time. The dsl is
   #      # A file located on the cluster
@@ -379,23 +379,23 @@ class ToolConfig < ApplicationRecord
         dp_ovs = dp.singularity_overlays_full_paths rescue nil
         cb_error "DataProvider #{id_or_name} does not have any overlays configured." if dp_ovs.blank?
         dp_ovs.map do |dp_path|
-          ["Data Provider", dp_path]
+          { dp_path => "Data Provider" }
         end
       when 'file'
         cb_error "Provide absolute path for overlay file '#{id_or_name}'." if (Pathname.new id_or_name).relative?
-        ["local file", id_or_name]  # for local file, it is full file name (no ids)
+        { id_or_name => "local file" }  # for local file, it is full file name (no ids)
       when 'userfile'
         # db registered file, note admin can access all files
         userfile = SingleFile.where(:id => id_or_name).last
         cb_error "Userfile with id '#{id_or_name}' for overlay fetching not found." if ! userfile
         userfile.sync_to_cache() rescue cb_error "Userfile with id '#{id_or_name}' for fetching overlay failed to synchronize."
-        ["registered userfile", userfile.cache_full_path()]
+        { userfile.cache_full_path() =>  "registered userfile" }
       when 'ext3capture'
-        nil  # handled separately
+        []  # handled separately
       else
         cb_error "Invalid '#{knd}:#{id_or_name}' overlay."
       end
-    end.flatten(1).uniq.compact
+    end.flatten.reduce(&:merge)
   end
 
   # Returns an array of the data providers that are
