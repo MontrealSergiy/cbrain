@@ -378,7 +378,9 @@ class ToolConfig < ApplicationRecord
         cb_error "Can't find DataProvider #{id_or_name} for fetching overlays" if ! dp
         dp_ovs = dp.singularity_overlays_full_paths rescue nil
         cb_error "DataProvider #{id_or_name} does not have any overlays configured." if dp_ovs.blank?
-        ["Data Provider"].cycle.zip(dp_ovs)
+        dp_ovs.map do |dp_path|
+          ["Data Provider", dp_path]
+        end
       when 'file'
         cb_error "Provide absolute path for overlay file '#{id_or_name}'." if (Pathname.new id_or_name).relative?
         ["local file", id_or_name]  # for local file, it is full file name (no ids)
@@ -443,7 +445,7 @@ class ToolConfig < ApplicationRecord
       errors[:container_engine] = "a container hub image name or a container image userfile ID should be set when the container engine is set"
     end
 
-    if self.container_engine.present? && self.container_engine == "Singularity" 
+    if self.container_engine.present? && self.container_engine == "Singularity"
       if self.container_index_location.present? && self.container_index_location !~ /\A[a-z0-9]+\:\/\/\z/i
         errors[:container_index_location] = "is invalid for container engine Singularity. Should end in '://'."
       end
