@@ -102,6 +102,23 @@
     }
   }
 
+  // simple copy key to buffer button
+  function copy_code(event) {
+    if (navigator.clipboard) {
+      txt = 'a'
+      let button = document.createElement("button");
+      ".add_copy_button".after(''
+
+
+
+      )
+      $(document).on("click", ".add_copy_button", function () {
+       // Get unselected items in this group
+      }
+    }
+  }
+
+
   //Behaviours for newly loaded content that isn't triggered
   //by the user.
   //
