@@ -102,42 +102,6 @@
     }
   }
 
-  // buttons of class 'copy_button' copy its label (text inside) on click
-  // best for api
-  function copy_to_buffer_button(event) {
-    if (navigator.clipboard) {
-      $(".copy_button").each(function () {
-        let $this = $(this); // Cache jQuery object
-        let text = $this.text().trim(); // Get the original text
-
-        // Store text in a data attribute for later copying
-        $this.attr("data-copy-text", text);
-
-        if (!$this.find("svg").length) {
-          $this.html(text + ` 
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" 
-                         xmlns="http://www.w3.org/2000/svg" style="margin-left: 5px; vertical-align: middle;">
-                        <rect x="4" y="4" width="14" height="14" rx="2" ry="2" 
-                              fill="#d1d5da" stroke="#6a737d" stroke-width="1.25"/>
-                        <rect x="7" y="7" width="14" height="14" rx="2" ry="2" 
-                              fill="#d1d5da" stroke="#6a737d" stroke-width="1.25"/>
-                    </svg>
-                `);
-        }
-
-        // Remove class after processing to avoid duplicate processing
-        $this.removeClass("copy_button");
-
-        // Add click event to copy text
-        $this.off("click").on("click", function () {
-          navigator.clipboard.writeText($this.attr("data-copy-text")).then(() => {
-            alert("Copied: " + $this.attr("data-copy-text")); // Optional feedback
-          }).catch(err => console.error("Copy failed", err));
-        });
-      });
-    }
-  }
-
   //Behaviours for newly loaded content that isn't triggered
   //by the user.
   //
@@ -825,6 +789,61 @@
 
       tool_tip.hide();
     });
+
+    // buttons of class 'copy_button' copy its label (text inside) on click
+    // best for api
+
+      if (navigator.clipboard) {
+        $(".copy-button").each(function () {
+          let $this = $(this); // Cache jQuery object
+          let text = $this.text().trim(); // Get the original text
+
+          // Store text in a data attribute for later copying
+          $this.attr("data-copy-text", text);
+
+          if (!$this.find("svg").length) {
+            $this.html(text + ` 
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" 
+                         xmlns="http://www.w3.org/2000/svg" style="margin-left: 5px; vertical-align: middle;">
+                        <rect x="4" y="4" width="14" height="14" rx="2" ry="2" 
+                              fill="#d1d5da" stroke="#6a737d" stroke-width="1.25"/>
+                        <rect x="7" y="7" width="14" height="14" rx="2" ry="2" 
+                              fill="#d1d5da" stroke="#6a737d" stroke-width="1.25"/>
+                    </svg>
+                `);
+          }
+
+          // Remove class after processing to avoid duplicate processing
+          $this.removeClass("copy-button");
+          $this.css("position", "relative");
+          // Tooltip for feedback
+          let tooltip = $(`
+                    <span class="copy_tooltip" style="
+                        position: absolute;
+                        top: -25px; right: 5px;
+                        background: #333;
+                        color: white;
+                        padding: 3px 6px;
+                        font-size: 12px;
+                        border-radius: 4px;
+                        opacity: 0;
+                        transition: opacity 0.3s;
+                        pointer-events: none;
+                    ">Copied to buffer!</span>
+                `);
+          $this.append(tooltip); // Add tooltip
+
+          // Add click event to copy text
+          $this.off("click").on("click", function () {
+            navigator.clipboard.writeText($this.attr("data-copy-text")).then(() => {
+              // Show tooltip
+              tooltip.css({ display: "block", opacity: "1"});
+              setTimeout(() => tooltip.css("opacity", "0"), 2000);
+            }).catch(err => console.error("Copy failed", err));
+          });
+        });
+      }
+
 
     /////////////////////////////////////////////////////////////////////
     //
