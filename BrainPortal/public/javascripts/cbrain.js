@@ -797,7 +797,7 @@
       $(".copy-text").each(function () {
         let $this = $(this);
 
-        // Get text with line breaks preserved (best effort)
+        // Keep line breaks
         let text = $this.html()
             .replace(/<br\s*\/?>/g, "\n")
             .replace(/<\/p>\s*<p>/g, "\n")
