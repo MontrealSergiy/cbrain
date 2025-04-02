@@ -3,7 +3,7 @@
     "tool-version":   "6.2.0",
     "schema-version": "0.5",
     "author":         "Pierre Rioux",
-    "description":    "A demo CBRAIN task using a Boutiques descriptor. This program runs the UNIX 'du' command on some files or directories.",
+    "description":    "Updated demo CBRAIN task using a Boutiques descriptor. This program runs the UNIX 'du' command on some files or directories.",
     "descriptor-url": "https://github.com/aces/cbrain/blob/master/BrainPortal/cbrain_plugins/cbrain-plugins-base/cbrain_task_descriptors/multi_boutiques_demo.json",
     "command-line": "echo String1 [STRING1] ; echo String2 [STRING2] ; sleep [SLEEP] ; du [ALL] [HUMAN] [FOLLOW_LINKS] [SINPUT1] [MINPUT1] [SINPUT2] [MINPUT2] | tee [DU_OUTPUT_NAME]",
     "inputs": [
