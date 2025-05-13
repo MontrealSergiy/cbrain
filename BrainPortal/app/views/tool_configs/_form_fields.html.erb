@@ -188,7 +188,7 @@
 
   <%= show_table(@tool_config, :form_helper => cf, :header => "Container", :edit_condition => check_role(:admin_user)) do |t| %>
     <% t.edit_cell(:container_engine, :header => "Container engine") do |f| %>
-      <%= f.select :container_engine, [["None", ''], ['Docker', 'Docker'], ['Singularity', 'Singularity']], :title => 'Container type' %>
+      <%= f.select :container_engine, [["None", ''], ['Docker', 'Docker'], ['Apptainer', 'Singularity']], :title => 'Container type' %>
     <% end %>
 
     <% t.edit_cell(:container_index_location, :header => "Index of the container image") do |f| %>
