@@ -318,9 +318,11 @@
   <% @as_user = @user %>
   <%= show_table(@user, :as => :user, :header => 'Disk Quotas') do |t| %>
     <% t.cell("", no_header: true, show_width: 2) do
-         render partial: "disk_quotas/disk_quotas_table"
+         render partial: "quotas/disk_quotas_table"
        end %>
   <% end %>
+
+
 
   <% if current_user.has_role?(:admin_user) %>
 

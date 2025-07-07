@@ -45,6 +45,25 @@
 </div>
 
 <% if @mode == :disk %>
+
+  <% user_list = current_user.available_users.sort_by(&:login) %>
+    <% if user_list.size > 1 && current_user.has_role?(:admin_user) %>
+      <div class="disk_quota_user_select">
+        View as
+        <%=
+          ajax_onchange_select(:as_user_id,
+                               quotas_path(:mode => :disk),
+                               options_for_select(
+                               user_list.collect { |u| [ u.login, u.id.to_s ] },
+                               @as_user.id.to_s
+                               ),
+                               :datatype => 'script'
+          )
+        %>
+      </div>
+
+    <% end %>
+
   <fieldset class="disk_quota_explanations" style="display: none">
     <legend>About Disk Quotas</legend>
     <p class="long_paragraphs">

@@ -97,7 +97,7 @@ class UsersController < ApplicationController
     @oidc_uris    = generate_oidc_login_uri(@oidc_configs)
 
     # few attributes for quotes table
-    @scope = scope_from_session("myquotes")
+    @scope = scope_from_session("mydiskquotes")
     dp_ids = DataProvider.all.select { |dp| dp.can_be_accessed_by?(current_user) }.map(&:id)
     @base_scope = DiskQuota.where(
       :data_provider_id => dp_ids,
@@ -106,8 +106,9 @@ class UsersController < ApplicationController
 
     @view_scope   = @scope.apply(@base_scope)
 
-    @scope.pagination ||= Scope::Pagination.from_hash({ :per_page => 15 })
-    @disk_quotas = @scope.pagination.apply(@view_scope)
+    @scope.pagination ||= Scope::Pagination.from_hash({ :per_page => 10 })
+    @quotas = @scope.pagination.apply(@view_scope)
+    
 
     respond_to do |format|
       format.html # show.html.erb
