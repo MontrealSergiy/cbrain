@@ -37,18 +37,15 @@ class QuotasController < ApplicationController
     @mode  = :cpu  if params[:mode].to_s == 'cpu'
     @mode  = :disk if params[:mode].to_s == 'disk' || @mode != :cpu
     cbrain_session[:quota_mode] = @mode.to_s
-
     @scope = scope_from_session("#{@mode}_quotas#index")
+
+    # Make sure the target user is set if viewing quotas for another user.
+    @as_user                    = report_for params['as_user_id']
+    @scope.custom['as_user_id'] = @as_user.id
 
     @base_scope   = base_scope.includes([:user, :data_provider  ]) if @mode == :disk
     @base_scope   = base_scope.includes([:user, :remote_resource]) if @mode == :cpu
-    @view_scope   = @scope.apply(@base_scope)
 
-    # Make sure the target user is set if browsing as another user.
-    @as_user                    = browse_as params['as_user_id']
-    @scope.custom['as_user_id'] = @as_user.id  # can also be current user
-
-    @base_scope = base_scope.includes([:user, :data_provider])
     @view_scope = @scope.apply(@base_scope)
 
     @scope.pagination ||= Scope::Pagination.from_hash({ :per_page => 15 })
@@ -350,10 +347,12 @@ class QuotasController < ApplicationController
 
   end
 
+  require 'pry'
+
   def report_almost
     @mode = params[:mode].to_s == 'cpu' ? :cpu : :disk
     cb_exception("not supported") if @mode == :cpu
-    report_disk_quotas if @mode == :disk
+    report_disk_almost if @mode == :disk
   end
 
   def report_disk_almost
@@ -407,8 +406,9 @@ class QuotasController < ApplicationController
 
   end
 
-  def browse_as(as_user_id) #:nodoc:
-    scope     = scope_from_session # ("quota#browse") todo
+  # a clone of browse_as
+  def report_for(as_user_id) #:nodoc:
+    scope     = scope_from_session("#{@mode}_quotas#index")
     users     = current_user.available_users
     as_user   = users.where(:id => as_user_id).first
     as_user ||= users.where(:id => scope.custom['as_user_id']).first
@@ -439,12 +439,12 @@ class QuotasController < ApplicationController
     scope = DiskQuota.where(nil) if @mode == :disk
     scope = CpuQuota.where(nil)  if @mode == :cpu
 
-    return scope if current_user.has_role?(:admin_user)
+    return scope if current_user.has_role?(:admin_user) && @as_user.id == current_user.id
 
     if @mode == :disk
-      dp_ids = DataProvider.all.select { |dp| dp.can_be_accessed_by?(current_user) }.map(&:id)
+      dp_ids = DataProvider.all.select { |dp| dp.can_be_accessed_by?(@as_user) }.map(&:id)
       scope = scope.where(
-        :user_id          => [ 0, current_user.id ],
+        :user_id          => [ 0, @as_user.id ],
         :data_provider_id => dp_ids,
       )
     end
