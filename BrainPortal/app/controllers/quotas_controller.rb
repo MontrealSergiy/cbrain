@@ -40,7 +40,7 @@ class QuotasController < ApplicationController
     @scope = scope_from_session("#{@mode}_quotas#index")
 
     # Make sure the target user is set if viewing quotas for another user.
-    @as_user                    = report_for params['as_user_id']
+    @as_user                    = see_as_user params['as_user_id']
     @scope.custom['as_user_id'] = @as_user.id
 
     @base_scope   = base_scope.includes([:user, :data_provider  ]) if @mode == :disk
@@ -407,7 +407,7 @@ class QuotasController < ApplicationController
   end
 
   # a clone of browse_as
-  def report_for(as_user_id) #:nodoc:
+  def see_as_user(as_user_id) #:nodoc:
     scope     = scope_from_session("#{@mode}_quotas#index")
     users     = current_user.available_users
     as_user   = users.where(:id => as_user_id).first
