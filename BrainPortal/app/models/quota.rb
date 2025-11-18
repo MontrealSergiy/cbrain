@@ -28,4 +28,6 @@ class Quota < ApplicationRecord
 
   cbrain_abstract_model! # objects of this class are not to be instantiated
 
+  CUMULATIVE_ALL_USERS = Quota::CUMULATIVE_ALL_USERS# indicate total quota for all the users togeter
+  
 end
