@@ -1,0 +1,81 @@
+{
+    "name": "eegml-resting-alpha",
+    "author": "Dominik Welke <https://github.com/dominikwelke>",
+    "description": "Run a simple pipeline to extract alpha features on a BIDS dataset from the EEGML resting spinnoff.",
+    "tool-version": "0.1",
+    "schema-version": "0.5",
+    "command-line": "mkdir -p [OUTPUT_PATH]; eegml_resting_alpha [BIDS_ROOT] [OUTPUT_PATH] && shopt -s nullglob && set -- [OUTPUT_PATH]/* &&  [ $# -gt 0 ] || exit 1",
+    "container-image": {
+        "image": "dominikwelke/eegml_resting_alpha:0.1",
+        "index": "docker://",
+        "type": "singularity"
+    },
+    "inputs": [
+        {
+            "id": "bids_root",
+            "name": "BIDS data",
+            "optional": false,
+            "type": "File",
+            "description": "Input BIDS data for the pipeline.",
+            "value-key": "[BIDS_ROOT]"
+        },
+        {
+            "id": "output_path",
+            "name": "Output folder",
+            "default-value": "eegml_resting_alpha_results",
+            "optional": false,
+            "type": "String",
+            "description": "Output folder to write the results.",
+            "value-key": "[OUTPUT_PATH]"
+        }
+    ],
+    "output-files": [
+        {
+            "id": "output_directory",
+            "name": "Results",
+            "optional": false,
+            "description": "Output directory",
+            "path-template": "[OUTPUT_PATH]"
+        }
+    ],
+    "suggested-resources": {
+        "walltime-estimate": 7200,
+        "ram": 16
+    },
+    "custom": {
+        "cbrain:author": "Dominik Welke <d.welke@leeds.ac.uk>, Serge Boroday <serge.boroday@mcin.ca>",
+        "cbrain:readonly-input-files": true,
+        "cbrain:integrator_modules": {
+            "BoutiquesBidsSingleSubjectMaker": "bids_root",
+            "BoutiquesFileNameVerifier": [
+                "output_path"
+            ],
+            "BoutiquesOutputFilenameRenamer": {
+                "output-files": [
+                    "bids_root",
+                    "output_path"
+                ]
+            },
+            "BoutiquesFileNameMatcher": {
+                "bids_root": "^sub-[a-zA-Z0-9_]+$"
+            },
+            "BoutiquesFileTypeVerifier": {
+                "bids_root": [
+                    "BidsSubject"
+                ]
+            }
+        }
+    },
+    "tags": {
+        "domain": [
+            "neuroinformatics",
+            "eeg",
+            "eegnet"
+        ],
+        "toolbox": [
+            "mne",
+            "mne_bids",
+            "autoreject"
+        ]
+    }
+}
