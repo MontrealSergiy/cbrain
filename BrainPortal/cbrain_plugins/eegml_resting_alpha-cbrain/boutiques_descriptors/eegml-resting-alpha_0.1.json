@@ -4,7 +4,7 @@
     "description": "Run a simple pipeline to extract alpha features on a BIDS dataset from the EEGML resting spinnoff.",
     "tool-version": "0.1",
     "schema-version": "0.5",
-    "command-line": "mkdir -p [OUTPUT_PATH]; eegml_resting_alpha [BIDS_ROOT] [OUTPUT_PATH] && shopt -s nullglob && set -- [OUTPUT_PATH]/* &&  [ $# -gt 0 ] || exit 1",
+    "command-line": "mkdir -p [OUTPUT_PATH]; eegml_resting_alpha [BIDS_ROOT] [OUTPUT_PATH] && shopt -s nullglob && set -- [OUTPUT_PATH]/* &&  [ $# -gt 0 ] ",
     "container-image": {
         "image": "dominikwelke/eegml_resting_alpha:0.1",
         "index": "docker://",
