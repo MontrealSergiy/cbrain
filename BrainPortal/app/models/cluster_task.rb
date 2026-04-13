@@ -556,6 +556,50 @@ class ClusterTask < CbrainTask
     end
   end
 
+  # Copies +userfile+ to workdir using rsync
+  #
+  # Option fail_symlink is added for future improvements.
+  #
+  # Based upon copy inputs module with few omissions
+
+  def copy_to_workdir(userfile, fail_symlink = true)
+
+    userfile_name            = userfile.name
+
+    userfile_cache_full_path = userfile.cache_full_path     # Path in cache
+
+    # todo delete
+    # if userfile_cache_full_path.to_s != userfile_path.to_s && symlink_exists
+    #   cb_error("#{basename}: path of cache and workdir are inconsistent for '#{userfile_name}'.")
+    # end
+
+    if File.symlink?(userfile_cache_full_path) && fail_symlink
+      cb_error("#{basename}: original userfile is not a symlink: '#{userfile_name}'.")
+    elsif File.exist?(userfile_cache_full_path)
+      self.addlog("Overwriting a link or copy of file with name #{userfile_cache_full_path} already exists in the workdir. ")
+      return true
+    end
+
+    self.addlog("#{basename}: Copy file '#{userfile_name}' to task work directory")
+
+    # Remove the symbolic link to the userfile's cache from the working directory
+    File.delete(userfile_name)
+
+    # Based on type, needed for rsync
+    need_slash    = userfile.is_a?(SingleFile) ? "" : "/"
+
+    rsync_cmd = "rsync -a --no-g --chmod=u=rwX,g=rX,Dg+s,o=r --delete #{userfile_cache_full_path.to_s.bash_escape}#{need_slash} #{self.full_cluster_workdir.to_s.bash_escape}/#{userfile_name.bash_escape} 2>&1"
+    # self.addlog("Running: #{rsync_cmd}")
+    rsyncout  = ic_bash_this(rsync_cmd)
+
+    unless rsyncout.blank?
+      FileUtils.rm_rf(userfile_name) if File.exist?(userfile_name)
+      cb_error "Failed to copy '#{userfile.name}'; rsync reported: #{rsyncout}"
+    end
+
+  end
+
+
   # This method takes an array of userfiles +creatorlist+ (or a single one),
   # another array of userfiles +createdlist+ (or a single one)
   # and records for each created file what were the creators, and for

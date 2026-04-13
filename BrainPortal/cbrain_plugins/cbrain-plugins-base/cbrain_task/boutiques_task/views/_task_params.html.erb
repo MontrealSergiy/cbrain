@@ -92,5 +92,11 @@
 #  cap.html_safe
 %>
 
+
 <%= render :partial => task_partial(:form_js), :locals => { :interface_files => interface_files } %>
 
+<% if @task.fake_outputs_available_to_user?(current_user)  %>
+
+   <%= render :partial => task_partial(:fake_output_panel) %>
+
+<% end %>

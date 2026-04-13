@@ -24,6 +24,8 @@ class BoutiquesPortalTask < PortalTask
 
   Revision_info=CbrainFileRevision[__FILE__] #:nodoc:
 
+  include BoutiquesFakeOutputs
+
   # This method returns the BoutiquesDescriptor
   # directly associated with the ToolConfig for the task
   def boutiques_descriptor
@@ -248,6 +250,9 @@ class BoutiquesPortalTask < PortalTask
       # Validate the other file columns
       validateCols(cbcsv, invokename)
     end
+
+    # Validate fake output specs (admin-only).
+    validate_fake_output_specs(descriptor)
 
     "" # No special message for user
   end # after_form

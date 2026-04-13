@@ -1,0 +1,93 @@
+<%-
+#
+# CBRAIN Project
+#
+# Copyright (C) 2024
+# The Royal Institution for the Advancement of Learning
+# McGill University
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+-%>
+
+<%-
+  outputs     = @task.boutiques_descriptor.output_files || []
+  task_params = @task.params || {}
+  specs       = task_params[:fake_output_specs] || {}
+  uniq_class  = "fake_outputs_#{rand(10000)}"
+-%>
+
+
+  <fieldset class="groupentry">
+    <legend>
+      Debug: Generate Fake Outputs
+      <%= show_hide_toggle "(show/hide)", ".#{uniq_class}",
+                           :class          => "task_help_link",
+                           :slide_effect   => true,
+                           :slide_duration => "fast" %>
+    </legend>
+    <div class="<%= uniq_class %>" style="display: none;">
+      <p class="warning">
+        <strong>For admin tasks.</strong>
+        When enabled, the scientific computation is <strong>skipped entirely</strong>:
+        the cluster job runs <code>true</code> and the stand-in files listed below
+        are registered as outputs by <code>save_results</code>.
+      </p>
+      <p>
+        <%= check_box_tag "cbrain_task[params][enable_fake_outputs]", "1",
+                          task_params[:enable_fake_outputs].to_s == "1",
+                          :id => "enable_fake_outputs" %>
+        <%= label_tag "enable_fake_outputs", "Enable fake output generation" %>
+      </p>
+
+        <table class="simple_table">
+          <thead>
+            <tr>
+              <th>Output ID</th>
+              <th>Name (from descriptor)</th>
+              <th>Fake spec</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% outputs.each_with_index do |out, i| %>
+              <tr class="<%= i.even? ? "altrow" : "" %>">
+                <td><code><%= out.id %></code></td>
+                <td><%= out.name %></td>
+                <td>
+                  <%= text_field_tag(
+                        "cbrain_task[params][fake_output_specs][#{out.id}]",
+                        specs[out.id.to_s] || specs[out.id.to_sym],
+                        :placeholder => "fakefile, fakedir, or userfile ID",
+                        :class       => "normal_text",
+                        :size        => 30
+                      ) %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+
+
+      <dl>
+        <dt><code>fakefile</code></dt>
+        <dd>Creates a small stub text file at the expected output path.</dd>
+        <dt><code>fakedir</code></dt>
+        <dd>Creates an empty directory at the expected output path.</dd>
+        <dt><em>numeric ID</em></dt>
+        <dd>Syncs the CBRAIN userfile with that ID to cache and symlinks it into position.</dd>
+        <dt><em>(blank)</em></dt>
+        <dd>No stand-in is created.</dd>
+      </dl>
+    </div>
+  </fieldset>

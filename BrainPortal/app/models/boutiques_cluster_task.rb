@@ -27,6 +27,7 @@ class BoutiquesClusterTask < ClusterTask
   # Descriptor-based tasks are, by default, easily restartable and recoverable
   include RestartableTask
   include RecoverableTask
+  include BoutiquesFakeOutputs
 
   # This method returns the BoutiquesDescriptor
   # directly associated with the ToolConfig for the task
@@ -160,6 +161,19 @@ class BoutiquesClusterTask < ClusterTask
       fh.write "\n"
     end
 
+    # skip commands if fake outputs planted
+    if fake_outputs_enabled?
+      commands = <<-COMMANDS
+        # Fake outputs enabled! Skipping tool execution
+        true
+        status=$?
+        echo $status > #{exit_status_filename.bash_escape}
+        bash -c "exit $status"
+      COMMANDS
+      commands.gsub!(/(\S)  +(\S)/,'\1 \2') # make pretty
+      return [ commands ]
+    end
+
     if self.boutiques_bosh_exec_mode == :simulate # the default
       simulate_com = <<-SIMULATE
         bosh exec simulate
@@ -208,6 +222,7 @@ class BoutiquesClusterTask < ClusterTask
     self.addlog(Revision_info.format("%f rev. %s %a %d"))
 
     custom     = descriptor.custom || {} # 'custom' is not packaged as an object, just a hash
+    cbrain_to_ignore = custom['cbrain:ignore_outputs'] || []
 
     # Verifications of proper exit status
     # and command completion.
@@ -241,9 +256,14 @@ class BoutiquesClusterTask < ClusterTask
                                 JSON.parse(File.read(self.invoke_json_basename))
                               )
 
+    all_ok = true
+
+    # Generate any requested fake outputs before normal processing.
+    if fake_outputs_enabled?
+      all_ok = generate_fake_outputs(descriptor, substitutions_by_token)
+    end
+
     # Process all outputs
-    all_ok           = true
-    cbrain_to_ignore = custom['cbrain:ignore_outputs'] || []
     descriptor.output_files
       .select { |output| ! cbrain_to_ignore.include?(output.id) }
       .each do |output|
@@ -432,6 +452,156 @@ class BoutiquesClusterTask < ClusterTask
   #########################################################
   # Local utility methods
   #########################################################
+
+  # Generate the fake outputs specified in the task params.
+  # Returns true if all requested fake outputs were created.
+  def generate_fake_outputs(descriptor, substitutions_by_token)
+    specs = fake_output_specs
+    return true if specs.blank?
+
+    self.addlog("Fake outputs enabled: generating stand-in outputs.")
+
+    ok = true
+    outputs = descriptor.output_files || []
+    outputs.each do |output|
+      next if ignored_output_ids.include?(output.id)
+
+      spec = specs[output.id.to_s].to_s.strip
+      next if spec.blank?
+
+      case spec.downcase
+      when "fakefile"
+        ok = create_fake_output_stub(descriptor, output, substitutions_by_token, :file) && ok
+      when "fakedir"
+        ok = create_fake_output_stub(descriptor, output, substitutions_by_token, :dir) && ok
+      else
+        if spec =~ /\A\d+\z/
+          ok = plant_userfile_as_fake_output(descriptor, output, substitutions_by_token, spec.to_i) && ok
+        else
+          self.addlog("Fake output spec for '#{output.id}' is invalid: '#{spec}' (expected fakefile, fakedir, or userfile ID)")
+          ok = false
+        end
+      end
+    end
+
+    unknown = specs.keys - outputs.map(&:id).map(&:to_s)
+    unknown.each do |oid|
+      self.addlog("Fake output spec provided for unknown output ID '#{oid}'")
+    end
+
+    ok
+  end
+
+  # Create a stub file or directory for a fake output.
+  def create_fake_output_stub(descriptor, output, substitutions_by_token, kind)
+    full_path, rel_path = resolve_fake_output_path(descriptor, output, substitutions_by_token)
+    return false if full_path.blank?
+
+    FileUtils.rm_rf(full_path) if File.exist?(full_path) || File.symlink?(full_path)
+
+    if kind == :dir
+      FileUtils.mkdir_p(full_path)
+    else
+      FileUtils.mkdir_p(File.dirname(full_path))
+      File.open(full_path, "wb") do |fh|
+        fh.write("CBRAIN fake output for task #{self.id} (#{output.id})\n")
+      end
+    end
+
+    self.addlog("Fake output '#{output.id}': created #{kind} #{rel_path}")
+    true
+  rescue => e
+    self.addlog("Fake output '#{output.id}': failed to create #{kind} (#{e.class}: #{e.message})")
+    false
+  end
+
+  # Link an existing userfile into the workdir as a fake output.
+  def plant_userfile_as_fake_output(descriptor, output, substitutions_by_token, userfile_id)
+    full_path, rel_path = resolve_fake_output_path(descriptor, output, substitutions_by_token)
+    return false if full_path.blank?
+
+    userfile = Userfile.find_accessible_by_user(
+      userfile_id,
+      self.user,
+      :access_requested => :read,
+    ) rescue nil
+    if userfile.nil?
+      self.addlog("Fake output '#{output.id}': cannot access userfile ID #{userfile_id}")
+      return false
+    end
+
+    userfile.sync_to_cache
+
+    # There is a risk to alter or delete input data
+    # while typically input symlinks are not in subdirectory, it is safer to check
+    first_dir = Pathname.new(rel_path).descend do |p|
+      if File.symlink?( File.join(self.full_cluster_workdir, p) )
+        self.addlog("Fake output '#{output.id}': cannot link userfile #{userfile_id} to '#{rel_path}'" +
+                    "'#{p}' is a symlink - danger to overwrite existing userfiles")
+        return false
+      end
+    end
+
+    # overwriting workdir files is undesirable, but not that risky
+    # so no check is performed
+
+    abs_path = File.join(self.full_cluster_workdir, rel_path)
+    # if needed directory or nested directories are created to place file there
+    ok = userfile.cache_copy_to_local_file(userfile, File.join(self.full_cluster_workdir, abs_path))
+
+    unless ok
+      FileUtils.rm_rf(rel_path) if File.exist?(rel_path)
+      cb_error "Failed to copy '#{userfile.name}'; rsync reported: #{rsyncout}"
+    end
+
+    self.addlog("Fake output '#{output.id}': placed userfile #{userfile_id} to #{rel_path}")
+    true
+
+  end
+
+  # Resolve the output path template to a concrete path inside the workdir.
+  # Returns [full_path, relative_path] or [nil, nil] on error.
+  def resolve_fake_output_path(descriptor, output, substitutions_by_token)
+    globpath = output.path_template
+    return [nil, nil] if globpath.blank?
+
+    to_strip = output.path_template_stripped_extensions || []
+    resolved = descriptor.apply_substitutions(globpath, substitutions_by_token, to_strip)
+    resolved = materialize_glob_path(resolved)
+    resolved = resolved.sub(%r{\A\./}, "")
+    resolved = resolved.sub(%r{/+\z}, "")
+
+    workdir = self.full_cluster_workdir
+    return [nil, nil] if workdir.blank?
+    workdir_path = Pathname.new(workdir)
+    full_path = Pathname.new(resolved)
+    full_path = workdir_path + full_path if full_path.relative?
+    full_path = full_path.cleanpath
+
+    rel_path = full_path.relative_path_from(workdir_path) rescue nil
+    if rel_path.nil? || rel_path.to_s.blank? || rel_path.to_s.start_with?("..")
+      self.addlog("Fake output '#{output.id}': resolved path outside workdir (#{full_path})")
+      return [nil, nil]
+    end
+
+    [ full_path.to_s, rel_path.to_s ]
+  rescue => e
+    self.addlog("Fake output '#{output.id}': failed to resolve path (#{e.class}: #{e.message})")
+    [nil, nil]
+  end
+
+  # Turn a glob path into a concrete path that should match it.
+  def materialize_glob_path(globpath)
+    return globpath unless globpath =~ /[\*\?\[\]\{\}]/
+
+    path = globpath.dup
+    path.gsub!(/\{([^}]+)\}/) { |m| (Regexp.last_match(1).to_s.split(",").first || "fake").strip }
+    path.gsub!(/\[[^\]]+\]/)  { |m| m[1] || "f" }
+    path.gsub!(/\*\*\/?/)     { |m| m.end_with?("/") ? "fake/" : "fake" }
+    path.gsub!(/\*/, "fake")
+    path.gsub!(/\?/, "f")
+    path
+  end
 
   # Filename used to hold the exit status of the tool.
   # This file is generated as soon as the task is
