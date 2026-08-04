@@ -122,9 +122,6 @@ int_inputs_list     = int_inputs.map(&:id)
 
 %>
 
-<%# Pierre's cute JSON inline serializer %>
-<% json = lambda { |x| JSON[x].html_safe } %>
-
 <script type="application/javascript">
 
 "use strict";
@@ -147,10 +144,10 @@ $(function () {
   /*** Handle disables and requires relations between parameters ***/
 
   /* Javascript dictionaries for names, disabledBy, and requires */
-  var namesMap          = <%= json.( names_map ) %>;
-  var requiresMap       = <%= json.( requires_map ) %>;
-  var disabledByMap     = <%= json.( disabledBy_map ) %>;
-  var disabledByValue   = <%= json.( disabledBy_value ) %>;
+  var namesMap          = <%= raw j names_map %>;
+  var requiresMap       = <%= raw j requires_map %>;
+  var disabledByMap     = <%= raw j disabledBy_map %>;
+  var disabledByValue   = <%= raw j disabledBy_value %>;
 
   // Function to map ids to names to make the messages a little prettier
   var idToName = function(x){ return namesMap[x]; }
@@ -320,11 +317,11 @@ $(function () {
 
   /*** Handle constraints on numerical parameters ***/
   /* Maps and lists of constrained parameters */
-  var mins = <%= json.( min_inputs_map ) %>;
-  var maxs = <%= json.( max_inputs_map ) %>;
-  var ints = <%= json.( int_inputs_list ) %>;
-  var exclMins = <%= json.( min_inputs_exc_list ) %>;
-  var exclMaxs = <%= json.( max_inputs_exc_list ) %>;
+  var mins = <%= raw j min_inputs_map %>;
+  var maxs = <%= raw j max_inputs_map %>;
+  var ints = <%= raw j int_inputs_list %>;
+  var exclMins = <%= raw j min_inputs_exc_list %>;
+  var exclMaxs = <%= raw j max_inputs_exc_list %>;
 
   /* Adds warnings to number parameters that violate number constraints */
   function handleNumberConstraints() {
@@ -571,15 +568,15 @@ $(function () {
     // Classes for the modal (popup)
     var mdiv = 'preview-modal', mcont = 'preview-modal-content', mclose = 'preview-modal-close';
     // Input parameters (fetch ids and data from cbcsvs and json descriptor)
-    var ids    = <%= json.( inputs.map(&:id)                                 ) %>;
-    var names  = <%= json.( inputs.map(&:name)                               ) %>;
-    var reqed  = <%= json.( inputs.select { |p| ! p.optional }.map(&:id)     ) %>;
-    var files  = <%= json.( file_inputs.map(&:id)                            ) %>;
-    var cbcsvs = <%= json.( cbcsvs.map(&:name)                               ) %>;
-    var cids   = <%= json.( cbcsvs.map(&:id)                                 ) %>;
-    var flags  = <%= json.( inputs.select { |p| p.type == 'Flag' }.map(&:id) ) %>;
-    var cfmap  = <%= json.( cbcsvToFiles                                     ) %>;
-    var fileIdsToNames = <%= json.( interface_files.pluck(:id,:name).to_h    ) %>;
+    var ids    = <%= raw j inputs.map(&:id)                                  %>;
+    var names  = <%= raw j inputs.map(&:name)                                %>;
+    var reqed  = <%= raw j inputs.select { |p| ! p.optional }.map(&:id)      %>;
+    var files  = <%= raw j file_inputs.map(&:id)                             %>;
+    var cbcsvs = <%= raw j cbcsvs.map(&:name)                                %>;
+    var cids   = <%= raw j cbcsvs.map(&:id)                                  %>;
+    var flags  = <%= raw j inputs.select { |p| p.type == 'Flag' }.map(&:id)  %>;
+    var cfmap  = <%= raw j cbcsvToFiles                                      %>;
+    var fileIdsToNames = <%= raw j interface_files.pluck(:id,:name).to_h     %>;
 
     // Helper for extracting value lists
     var getVals = function( id, join ) {
@@ -820,4 +817,3 @@ $(function () {
 
 });
 </script>
-
